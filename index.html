@@ -3,9 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Amira's Study Tracker</title>
 
 <style>
+
 * {
   box-sizing: border-box;
 }
@@ -46,7 +48,12 @@ h2 {
   margin-top: 0;
 }
 
-input, select {
+h3 {
+  margin-bottom: 8px;
+}
+
+input,
+select {
   width: 100%;
   padding: 12px;
   margin: 7px 0 15px;
@@ -74,11 +81,42 @@ button:hover {
   background: #d9534f;
 }
 
+.secondary {
+  background: #6c8a94;
+}
+
 .module {
   border: 1px solid #dce5e8;
   border-radius: 12px;
-  padding: 15px;
-  margin-bottom: 12px;
+  padding: 17px;
+  margin-bottom: 15px;
+}
+
+.course {
+  background: #f7fafb;
+  border-radius: 10px;
+  padding: 12px;
+  margin-top: 8px;
+}
+
+.course-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.course-name {
+  font-weight: bold;
+}
+
+.status {
+  border: none;
+  padding: 6px 9px;
+  border-radius: 20px;
+  font-size: 12px;
+  background: #e5eeee;
+  color: #17324d;
 }
 
 .progress {
@@ -136,462 +174,1256 @@ button:hover {
   text-align: center;
   padding: 15px;
 }
+
+.add-course {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e5eeee;
+}
+
+.course-time {
+  font-size: 13px;
+  color: #687982;
+}
+
 </style>
 </head>
 
 <body>
 
 <header>
-  <h1>🩺 Amira's Study Tracker</h1>
-  <div>Study smarter. Track your progress.</div>
+
+<h1>🩺 Amira's Study Tracker</h1>
+
+<div>Study smarter. Track your progress.</div>
+
 </header>
+
 
 <div class="container">
 
-  <!-- DASHBOARD -->
-  <div class="card">
-    <h2>📊 Dashboard</h2>
 
-    <div class="stats">
-      <div class="stat">
-        Total studied
-        <strong id="totalTime">0h 00m</strong>
-      </div>
+<!-- DASHBOARD -->
 
-      <div class="stat">
-        Sessions
-        <strong id="sessionCount">0</strong>
-      </div>
+<div class="card">
 
-      <div class="stat">
-        Modules
-        <strong id="moduleCount">0</strong>
-      </div>
-    </div>
-  </div>
+<h2>📊 Dashboard</h2>
 
-  <!-- ADD MODULE -->
-  <div class="card">
-    <h2>➕ Add a module</h2>
+<div class="stats">
 
-    <input id="moduleName" placeholder="Module name (e.g. Uro-Nephro)">
+<div class="stat">
+Total studied
+<strong id="totalTime">0h 00m</strong>
+</div>
 
-    <label>Exam date</label>
-    <input id="examDate" type="date">
+<div class="stat">
+Sessions
+<strong id="sessionCount">0</strong>
+</div>
 
-    <label>Target study hours</label>
-    <input id="targetHours" type="number" min="0" placeholder="Example: 50">
-
-    <button onclick="addModule()">Add Module</button>
-  </div>
-
-  <!-- MODULES -->
-  <div class="card">
-    <h2>📚 My Modules</h2>
-    <div id="modules"></div>
-  </div>
-
-  <!-- TIMER -->
-  <div class="card">
-    <h2>⏱️ Study Timer</h2>
-
-    <label>Module</label>
-    <select id="timerModule">
-      <option value="">Choose a module</option>
-    </select>
-
-    <div class="timer" id="timer">00:00:00</div>
-
-    <div style="text-align:center;">
-      <button onclick="startTimer()">▶ Start</button>
-      <button onclick="pauseTimer()">⏸ Pause</button>
-      <button onclick="stopTimer()">⏹ Stop & Save</button>
-    </div>
-  </div>
-
-  <!-- SESSIONS -->
-  <div class="card">
-    <h2>📝 Study Sessions</h2>
-    <div id="sessions"></div>
-  </div>
+<div class="stat">
+Modules
+<strong id="moduleCount">0</strong>
+</div>
 
 </div>
 
+</div>
+
+
+
+<!-- ADD MODULE -->
+
+<div class="card">
+
+<h2>➕ Add a module</h2>
+
+<input
+id="moduleName"
+placeholder="Module name (e.g. Uro-Nephro)"
+>
+
+<label>Exam date</label>
+
+<input
+id="examDate"
+type="date"
+>
+
+<label>Target study hours</label>
+
+<input
+id="targetHours"
+type="number"
+min="0"
+placeholder="Example: 50"
+>
+
+<button onclick="addModule()">
+Add Module
+</button>
+
+</div>
+
+
+
+<!-- MODULES -->
+
+<div class="card">
+
+<h2>📚 My Modules</h2>
+
+<div id="modules"></div>
+
+</div>
+
+
+
+<!-- TIMER -->
+
+<div class="card">
+
+<h2>⏱️ Study Timer</h2>
+
+<label>Module</label>
+
+<select id="timerModule" onchange="updateCourseSelect()">
+
+<option value="">
+Choose a module
+</option>
+
+</select>
+
+
+<label>Course</label>
+
+<select id="timerCourse">
+
+<option value="">
+Choose a course
+</option>
+
+</select>
+
+
+<div class="timer" id="timer">
+00:00:00
+</div>
+
+
+<div style="text-align:center;">
+
+<button onclick="startTimer()">
+▶ Start
+</button>
+
+<button onclick="pauseTimer()">
+⏸ Pause
+</button>
+
+<button onclick="stopTimer()">
+⏹ Stop & Save
+</button>
+
+</div>
+
+</div>
+
+
+
+<!-- SESSIONS -->
+
+<div class="card">
+
+<h2>📝 Study Sessions</h2>
+
+<div id="sessions"></div>
+
+</div>
+
+
+</div>
+
+
+
 <script>
 
-let modules = JSON.parse(localStorage.getItem("modules")) || [];
-let sessions = JSON.parse(localStorage.getItem("sessions")) || [];
+
+/* =========================
+   DATA
+========================= */
+
+let modules =
+JSON.parse(localStorage.getItem("modules")) || [];
+
+let sessions =
+JSON.parse(localStorage.getItem("sessions")) || [];
+
 
 let timerInterval = null;
+
 let startTime = null;
+
 let elapsedBeforePause = 0;
+
 let active = false;
 
 
-/* ---------------- MODULES ---------------- */
+
+/* =========================
+   SAVE
+========================= */
 
 function saveData() {
-  localStorage.setItem("modules", JSON.stringify(modules));
-  localStorage.setItem("sessions", JSON.stringify(sessions));
+
+localStorage.setItem(
+"modules",
+JSON.stringify(modules)
+);
+
+localStorage.setItem(
+"sessions",
+JSON.stringify(sessions)
+);
+
 }
+
+
+
+/* =========================
+   ADD MODULE
+========================= */
 
 function addModule() {
 
-  const name = document.getElementById("moduleName").value.trim();
-  const examDate = document.getElementById("examDate").value;
-  const targetHours = Number(document.getElementById("targetHours").value);
+const name =
+document.getElementById("moduleName").value.trim();
 
-  if (!name) {
-    alert("Please enter a module name.");
-    return;
-  }
+const examDate =
+document.getElementById("examDate").value;
 
-  modules.push({
-    id: Date.now(),
-    name: name,
-    examDate: examDate,
-    targetHours: targetHours
-  });
+const targetHours =
+Number(
+document.getElementById("targetHours").value
+);
 
-  saveData();
 
-  document.getElementById("moduleName").value = "";
-  document.getElementById("examDate").value = "";
-  document.getElementById("targetHours").value = "";
+if (!name) {
 
-  render();
+alert("Please enter a module name.");
+
+return;
+
 }
 
+
+modules.push({
+
+id: Date.now(),
+
+name: name,
+
+examDate: examDate,
+
+targetHours: targetHours,
+
+courses: []
+
+});
+
+
+saveData();
+
+
+document.getElementById("moduleName").value = "";
+
+document.getElementById("examDate").value = "";
+
+document.getElementById("targetHours").value = "";
+
+
+render();
+
+}
+
+
+
+/* =========================
+   DELETE MODULE
+========================= */
 
 function deleteModule(id) {
 
-  if (!confirm("Delete this module?")) return;
+if (!confirm(
+"Delete this module and its courses?"
+)) return;
 
-  modules = modules.filter(module => module.id !== id);
 
-  saveData();
-  render();
+modules =
+modules.filter(module =>
+module.id !== id
+);
+
+
+saveData();
+
+render();
+
 }
 
+
+
+/* =========================
+   ADD COURSE
+========================= */
+
+function addCourse(moduleId) {
+
+const input =
+document.getElementById(
+"courseInput-" + moduleId
+);
+
+
+const name =
+input.value.trim();
+
+
+if (!name) {
+
+alert("Enter a course name.");
+
+return;
+
+}
+
+
+const module =
+modules.find(m =>
+m.id === moduleId
+);
+
+
+if (!module) return;
+
+
+if (!module.courses) {
+
+module.courses = [];
+
+}
+
+
+module.courses.push({
+
+id: Date.now(),
+
+name: name,
+
+status: "Not started"
+
+});
+
+
+input.value = "";
+
+
+saveData();
+
+render();
+
+}
+
+
+
+/* =========================
+   CHANGE COURSE STATUS
+========================= */
+
+function changeCourseStatus(
+moduleId,
+courseId,
+newStatus
+) {
+
+const module =
+modules.find(m =>
+m.id === moduleId
+);
+
+
+if (!module) return;
+
+
+const course =
+module.courses.find(c =>
+c.id === courseId
+);
+
+
+if (!course) return;
+
+
+course.status = newStatus;
+
+
+saveData();
+
+render();
+
+}
+
+
+
+/* =========================
+   DELETE COURSE
+========================= */
+
+function deleteCourse(
+moduleId,
+courseId
+) {
+
+const module =
+modules.find(m =>
+m.id === moduleId
+);
+
+
+if (!module) return;
+
+
+module.courses =
+module.courses.filter(c =>
+c.id !== courseId
+);
+
+
+saveData();
+
+render();
+
+}
+
+
+
+/* =========================
+   COURSE TIME
+========================= */
+
+function getCourseTime(courseId) {
+
+return sessions
+
+.filter(session =>
+session.courseId == courseId
+)
+
+.reduce(
+(total, session) =>
+total + session.duration,
+0
+);
+
+}
+
+
+
+/* =========================
+   MODULE TIME
+========================= */
 
 function getModuleTime(moduleId) {
 
-  return sessions
-    .filter(session => session.moduleId == moduleId)
-    .reduce((total, session) => total + session.duration, 0);
+return sessions
+
+.filter(session =>
+session.moduleId == moduleId
+)
+
+.reduce(
+(total, session) =>
+total + session.duration,
+0
+);
+
 }
 
+
+
+/* =========================
+   RENDER MODULES
+========================= */
 
 function renderModules() {
 
-  const container = document.getElementById("modules");
+const container =
+document.getElementById("modules");
 
-  if (modules.length === 0) {
-    container.innerHTML =
-      '<div class="empty">No modules yet. Add your first module above!</div>';
-    return;
-  }
 
-  container.innerHTML = "";
+if (modules.length === 0) {
 
-  modules.forEach(module => {
+container.innerHTML =
+'<div class="empty">' +
+'No modules yet. Add your first module above!' +
+'</div>';
 
-    const studiedSeconds = getModuleTime(module.id);
-    const studiedHours = studiedSeconds / 3600;
+return;
 
-    let percentage = 0;
-
-    if (module.targetHours > 0) {
-      percentage = Math.min(
-        100,
-        (studiedHours / module.targetHours) * 100
-      );
-    }
-
-    let daysText = "";
-
-    if (module.examDate) {
-
-      const today = new Date();
-      const exam = new Date(module.examDate + "T00:00:00");
-
-      const difference =
-        Math.ceil((exam - today) / (1000 * 60 * 60 * 24));
-
-      if (difference > 0) {
-        daysText = `📅 ${difference} days until exam`;
-      } else if (difference === 0) {
-        daysText = "🚨 Exam today!";
-      } else {
-        daysText = "Exam passed";
-      }
-    }
-
-    container.innerHTML += `
-
-      <div class="module">
-
-        <h3>${module.name}</h3>
-
-        <div class="small">
-          ${daysText}
-        </div>
-
-        <p>
-          Studied:
-          <strong>${formatTime(studiedSeconds)}</strong>
-          ${module.targetHours ? " / " + module.targetHours + "h" : ""}
-        </p>
-
-        <div class="progress">
-          <div
-            class="progress-bar"
-            style="width:${percentage}%">
-          </div>
-        </div>
-
-        <div class="small">
-          ${percentage.toFixed(0)}% of target
-        </div>
-
-        <button class="delete"
-          onclick="deleteModule(${module.id})">
-          Delete
-        </button>
-
-      </div>
-    `;
-  });
 }
 
 
-/* ---------------- TIMER ---------------- */
+container.innerHTML = "";
+
+
+modules.forEach(module => {
+
+
+if (!module.courses) {
+
+module.courses = [];
+
+}
+
+
+const studiedSeconds =
+getModuleTime(module.id);
+
+
+const studiedHours =
+studiedSeconds / 3600;
+
+
+let percentage = 0;
+
+
+if (module.targetHours > 0) {
+
+percentage =
+Math.min(
+100,
+(studiedHours /
+module.targetHours) * 100
+);
+
+}
+
+
+let daysText = "";
+
+
+if (module.examDate) {
+
+const today = new Date();
+
+const exam =
+new Date(
+module.examDate + "T00:00:00"
+);
+
+
+const difference =
+Math.ceil(
+(exam - today) /
+(1000 * 60 * 60 * 24)
+);
+
+
+if (difference > 0) {
+
+daysText =
+`📅 ${difference} days until exam`;
+
+}
+
+else if (difference === 0) {
+
+daysText =
+"🚨 Exam today!";
+
+}
+
+else {
+
+daysText =
+"Exam passed";
+
+}
+
+}
+
+
+let coursesHTML = "";
+
+
+if (module.courses.length === 0) {
+
+coursesHTML =
+'<div class="small">' +
+'No courses added yet.' +
+'</div>';
+
+}
+
+else {
+
+
+module.courses.forEach(course => {
+
+
+const courseSeconds =
+getCourseTime(course.id);
+
+
+coursesHTML += `
+
+<div class="course">
+
+<div class="course-header">
+
+<div>
+
+<div class="course-name">
+${course.name}
+</div>
+
+<div class="course-time">
+⏱ ${formatTime(courseSeconds)}
+</div>
+
+</div>
+
+
+<select
+class="status"
+onchange="changeCourseStatus(
+${module.id},
+${course.id},
+this.value
+)"
+>
+
+<option
+${course.status === "Not started"
+? "selected" : ""}
+>
+Not started
+</option>
+
+<option
+${course.status === "Studying"
+? "selected" : ""}
+>
+Studying
+</option>
+
+<option
+${course.status === "Done"
+? "selected" : ""}
+>
+Done
+</option>
+
+</select>
+
+</div>
+
+
+<button
+class="delete"
+onclick="deleteCourse(
+${module.id},
+${course.id}
+)"
+>
+Delete
+</button>
+
+</div>
+
+`;
+
+});
+
+}
+
+
+container.innerHTML += `
+
+<div class="module">
+
+<h3>
+${module.name}
+</h3>
+
+<div class="small">
+${daysText}
+</div>
+
+<p>
+
+Studied:
+<strong>
+${formatTime(studiedSeconds)}
+</strong>
+
+${module.targetHours
+? " / " + module.targetHours + "h"
+: ""}
+
+</p>
+
+
+<div class="progress">
+
+<div
+class="progress-bar"
+style="width:${percentage}%"
+></div>
+
+</div>
+
+
+<div class="small">
+
+${percentage.toFixed(0)}% of target
+
+</div>
+
+
+<h4>
+📚 Courses
+</h4>
+
+${coursesHTML}
+
+
+<div class="add-course">
+
+<input
+id="courseInput-${module.id}"
+placeholder="Add a course..."
+>
+
+<button
+onclick="addCourse(${module.id})"
+>
++ Add Course
+</button>
+
+</div>
+
+
+<button
+class="delete"
+onclick="deleteModule(${module.id})"
+>
+Delete Module
+</button>
+
+</div>
+
+`;
+
+});
+
+}
+
+
+
+/* =========================
+   TIMER
+========================= */
 
 function startTimer() {
 
-  const moduleId =
-    document.getElementById("timerModule").value;
 
-  if (!moduleId) {
-    alert("Choose a module first.");
-    return;
-  }
+const moduleId =
+document.getElementById(
+"timerModule"
+).value;
 
-  if (active) return;
 
-  active = true;
+const courseId =
+document.getElementById(
+"timerCourse"
+).value;
 
-  startTime = Date.now();
 
-  timerInterval = setInterval(updateTimer, 1000);
+if (!moduleId) {
+
+alert("Choose a module first.");
+
+return;
+
 }
 
+
+if (!courseId) {
+
+alert("Choose a course first.");
+
+return;
+
+}
+
+
+if (active) return;
+
+
+active = true;
+
+startTime = Date.now();
+
+
+timerInterval =
+setInterval(
+updateTimer,
+1000
+);
+
+}
+
+
+
+/* =========================
+   PAUSE
+========================= */
 
 function pauseTimer() {
 
-  if (!active) return;
 
-  elapsedBeforePause +=
-    Math.floor((Date.now() - startTime) / 1000);
+if (!active) return;
 
-  clearInterval(timerInterval);
 
-  active = false;
+elapsedBeforePause +=
 
-  updateTimer();
+Math.floor(
+(Date.now() - startTime) /
+1000
+);
+
+
+clearInterval(timerInterval);
+
+active = false;
+
+
+updateTimer();
+
 }
 
+
+
+/* =========================
+   STOP & SAVE
+========================= */
 
 function stopTimer() {
 
-  let duration = elapsedBeforePause;
 
-  if (active) {
+let duration =
+elapsedBeforePause;
 
-    duration +=
-      Math.floor((Date.now() - startTime) / 1000);
-  }
 
-  if (duration < 1) {
-    alert("No study time recorded.");
-    return;
-  }
+if (active) {
 
-  const moduleId =
-    Number(document.getElementById("timerModule").value);
+duration +=
 
-  const module =
-    modules.find(m => m.id === moduleId);
+Math.floor(
+(Date.now() - startTime) /
+1000
+);
 
-  sessions.unshift({
-
-    id: Date.now(),
-
-    moduleId: moduleId,
-
-    moduleName: module ? module.name : "Unknown",
-
-    duration: duration,
-
-    date: new Date().toLocaleString()
-
-  });
-
-  clearInterval(timerInterval);
-
-  timerInterval = null;
-  startTime = null;
-  elapsedBeforePause = 0;
-  active = false;
-
-  document.getElementById("timer").textContent =
-    "00:00:00";
-
-  saveData();
-  render();
 }
 
+
+if (duration < 1) {
+
+alert(
+"No study time recorded."
+);
+
+return;
+
+}
+
+
+const moduleId =
+Number(
+document.getElementById(
+"timerModule"
+).value
+);
+
+
+const courseId =
+Number(
+document.getElementById(
+"timerCourse"
+).value
+);
+
+
+const module =
+modules.find(m =>
+m.id === moduleId
+);
+
+
+const course =
+module?.courses.find(c =>
+c.id === courseId
+);
+
+
+sessions.unshift({
+
+id: Date.now(),
+
+moduleId: moduleId,
+
+moduleName:
+module
+? module.name
+: "Unknown",
+
+courseId: courseId,
+
+courseName:
+course
+? course.name
+: "Unknown",
+
+duration: duration,
+
+date:
+new Date().toLocaleString()
+
+});
+
+
+clearInterval(timerInterval);
+
+
+timerInterval = null;
+
+startTime = null;
+
+elapsedBeforePause = 0;
+
+active = false;
+
+
+document.getElementById(
+"timer"
+).textContent =
+"00:00:00";
+
+
+saveData();
+
+render();
+
+}
+
+
+
+/* =========================
+   UPDATE TIMER
+========================= */
 
 function updateTimer() {
 
-  let seconds = elapsedBeforePause;
 
-  if (active) {
+let seconds =
+elapsedBeforePause;
 
-    seconds +=
-      Math.floor((Date.now() - startTime) / 1000);
-  }
 
-  document.getElementById("timer").textContent =
-    formatClock(seconds);
+if (active) {
+
+seconds +=
+
+Math.floor(
+(Date.now() - startTime) /
+1000
+);
+
 }
 
 
-/* ---------------- SESSIONS ---------------- */
+document.getElementById(
+"timer"
+).textContent =
+formatClock(seconds);
 
-function renderSessions() {
-
-  const container =
-    document.getElementById("sessions");
-
-  if (sessions.length === 0) {
-
-    container.innerHTML =
-      '<div class="empty">No study sessions yet.</div>';
-
-    return;
-  }
-
-  container.innerHTML = "";
-
-  sessions.forEach(session => {
-
-    container.innerHTML += `
-
-      <div class="session">
-
-        <strong>${session.moduleName}</strong>
-
-        <br>
-
-        ⏱ ${formatTime(session.duration)}
-
-        <div class="small">
-          ${session.date}
-        </div>
-
-      </div>
-    `;
-  });
 }
 
 
-/* ---------------- DASHBOARD ---------------- */
 
-function renderDashboard() {
+/* =========================
+   COURSE SELECT
+========================= */
 
-  const totalSeconds =
-    sessions.reduce(
-      (total, session) => total + session.duration,
-      0
-    );
+function updateCourseSelect() {
 
-  document.getElementById("totalTime").textContent =
-    formatTime(totalSeconds);
 
-  document.getElementById("sessionCount").textContent =
-    sessions.length;
+const moduleId =
+Number(
+document.getElementById(
+"timerModule"
+).value
+);
 
-  document.getElementById("moduleCount").textContent =
-    modules.length;
+
+const select =
+document.getElementById(
+"timerCourse"
+);
+
+
+select.innerHTML =
+'<option value="">Choose a course</option>';
+
+
+const module =
+modules.find(m =>
+m.id === moduleId
+);
+
+
+if (!module || !module.courses)
+return;
+
+
+module.courses.forEach(course => {
+
+select.innerHTML += `
+
+<option value="${course.id}">
+${course.name}
+</option>
+
+`;
+
+});
+
 }
 
 
-/* ---------------- SELECT ---------------- */
+
+/* =========================
+   RENDER SELECT
+========================= */
 
 function renderSelect() {
 
-  const select =
-    document.getElementById("timerModule");
 
-  const current = select.value;
+const select =
+document.getElementById(
+"timerModule"
+);
 
-  select.innerHTML =
-    '<option value="">Choose a module</option>';
 
-  modules.forEach(module => {
+const current =
+select.value;
 
-    select.innerHTML += `
-      <option value="${module.id}">
-        ${module.name}
-      </option>
-    `;
-  });
 
-  select.value = current;
+select.innerHTML =
+'<option value="">Choose a module</option>';
+
+
+modules.forEach(module => {
+
+select.innerHTML += `
+
+<option value="${module.id}">
+${module.name}
+</option>
+
+`;
+
+});
+
+
+select.value = current;
+
+
+updateCourseSelect();
+
 }
 
 
-/* ---------------- FORMATTING ---------------- */
+
+/* =========================
+   SESSIONS
+========================= */
+
+function renderSessions() {
+
+
+const container =
+document.getElementById(
+"sessions"
+);
+
+
+if (sessions.length === 0) {
+
+container.innerHTML =
+'<div class="empty">' +
+'No study sessions yet.' +
+'</div>';
+
+return;
+
+}
+
+
+container.innerHTML = "";
+
+
+sessions.forEach(session => {
+
+container.innerHTML += `
+
+<div class="session">
+
+<strong>
+${session.moduleName}
+</strong>
+
+<br>
+
+<span class="small">
+📚 ${session.courseName || "General"}
+</span>
+
+<br>
+
+⏱ ${formatTime(session.duration)}
+
+<div class="small">
+${session.date}
+</div>
+
+</div>
+
+`;
+
+});
+
+}
+
+
+
+/* =========================
+   DASHBOARD
+========================= */
+
+function renderDashboard() {
+
+
+const totalSeconds =
+sessions.reduce(
+(total, session) =>
+total + session.duration,
+0
+);
+
+
+document.getElementById(
+"totalTime"
+).textContent =
+formatTime(totalSeconds);
+
+
+document.getElementById(
+"sessionCount"
+).textContent =
+sessions.length;
+
+
+document.getElementById(
+"moduleCount"
+).textContent =
+modules.length;
+
+}
+
+
+
+/* =========================
+   FORMAT TIME
+========================= */
 
 function formatTime(seconds) {
 
-  const hours =
-    Math.floor(seconds / 3600);
 
-  const minutes =
-    Math.floor((seconds % 3600) / 60);
+const hours =
+Math.floor(
+seconds / 3600
+);
 
-  return `${hours}h ${String(minutes).padStart(2, "0")}m`;
+
+const minutes =
+Math.floor(
+(seconds % 3600) / 60
+);
+
+
+return `${hours}h ${String(minutes).padStart(2,"0")}m`;
+
 }
+
 
 
 function formatClock(seconds) {
 
-  const hours =
-    Math.floor(seconds / 3600);
 
-  const minutes =
-    Math.floor((seconds % 3600) / 60);
+const hours =
+Math.floor(
+seconds / 3600
+);
 
-  const secs =
-    seconds % 60;
 
-  return `${String(hours).padStart(2, "0")}:` +
-         `${String(minutes).padStart(2, "0")}:` +
-         `${String(secs).padStart(2, "0")}`;
+const minutes =
+Math.floor(
+(seconds % 3600) / 60
+);
+
+
+const secs =
+seconds % 60;
+
+
+return `${String(hours).padStart(2,"0")}:` +
+
+`${String(minutes).padStart(2,"0")}:` +
+
+`${String(secs).padStart(2,"0")}`;
+
 }
 
 
-/* ---------------- RENDER EVERYTHING ---------------- */
+
+/* =========================
+   RENDER EVERYTHING
+========================= */
 
 function render() {
 
-  renderModules();
-  renderSessions();
-  renderDashboard();
-  renderSelect();
+renderModules();
+
+renderSessions();
+
+renderDashboard();
+
+renderSelect();
+
 }
+
 
 render();
 
