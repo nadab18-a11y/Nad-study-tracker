@@ -24,7 +24,6 @@ header {
   color: white;
   padding: 25px;
   text-align: center;
-  <img src="amira.jpg">
 }
 
 header h1 {
@@ -70,7 +69,7 @@ button {
   cursor: pointer;
   font-size: 15px;
   margin: 4px;
-  background: #F48FB1;
+  background: #0b7285;
   color: white;
 }
 
@@ -80,10 +79,6 @@ button:hover {
 
 .delete {
   background: #d9534f;
-}
-
-.secondary {
-  background: #6c8a94;
 }
 
 .module {
@@ -143,7 +138,7 @@ button:hover {
 
 .stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 12px;
 }
 
@@ -158,6 +153,63 @@ button:hover {
   display: block;
   font-size: 25px;
   margin-top: 5px;
+}
+
+.goal-box {
+  background: #eef7f8;
+  padding: 18px;
+  border-radius: 12px;
+  margin-top: 15px;
+}
+
+.goal-progress {
+  height: 15px;
+  background: #dce9eb;
+  border-radius: 20px;
+  overflow: hidden;
+  margin: 12px 0;
+}
+
+.goal-progress-bar {
+  height: 100%;
+  background: #0b7285;
+  width: 0%;
+  transition: width 0.4s;
+}
+
+.streak {
+  font-size: 35px;
+  font-weight: bold;
+}
+
+.day-row {
+  display: grid;
+  grid-template-columns: 50px 1fr 60px;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.day-label {
+  font-weight: bold;
+}
+
+.chart-bar {
+  height: 22px;
+  background: #dce9eb;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.chart-fill {
+  height: 100%;
+  background: #0b7285;
+  border-radius: 20px;
+}
+
+.day-hours {
+  text-align: right;
+  font-size: 13px;
 }
 
 .session {
@@ -190,7 +242,9 @@ button:hover {
 </style>
 </head>
 
+
 <body>
+
 
 <header>
 
@@ -218,6 +272,11 @@ Total studied
 </div>
 
 <div class="stat">
+Today
+<strong id="todayTime">0h 00m</strong>
+</div>
+
+<div class="stat">
 Sessions
 <strong id="sessionCount">0</strong>
 </div>
@@ -228,6 +287,92 @@ Modules
 </div>
 
 </div>
+
+
+<div class="goal-box">
+
+<h3>🎯 Today's Goal</h3>
+
+<div>
+
+<input
+id="dailyGoal"
+type="number"
+min="0.5"
+step="0.5"
+value="3"
+onchange="saveGoal()"
+>
+
+<label>
+Daily goal in hours
+</label>
+
+</div>
+
+
+<div class="goal-progress">
+
+<div
+id="goalProgressBar"
+class="goal-progress-bar">
+</div>
+
+</div>
+
+
+<div id="goalText">
+0h 00m / 3h
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- STREAK -->
+
+<div class="card">
+
+<h2>🔥 Study Streak</h2>
+
+<div class="stats">
+
+<div class="stat">
+
+Current streak
+
+<div class="streak">
+<span id="currentStreak">0</span> 🔥
+</div>
+
+</div>
+
+
+<div class="stat">
+
+Best streak
+
+<div class="streak">
+<span id="bestStreak">0</span> 🏆
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- WEEKLY CHART -->
+
+<div class="card">
+
+<h2>📈 This Week</h2>
+
+<div id="weeklyChart"></div>
 
 </div>
 
@@ -288,7 +433,10 @@ Add Module
 
 <label>Module</label>
 
-<select id="timerModule" onchange="updateCourseSelect()">
+<select
+id="timerModule"
+onchange="updateCourseSelect()"
+>
 
 <option value="">
 Choose a module
@@ -352,7 +500,7 @@ Choose a course
 
 
 /* =========================
-   DATA
+DATA
 ========================= */
 
 let modules =
@@ -360,6 +508,9 @@ JSON.parse(localStorage.getItem("modules")) || [];
 
 let sessions =
 JSON.parse(localStorage.getItem("sessions")) || [];
+
+let dailyGoal =
+Number(localStorage.getItem("dailyGoal")) || 3;
 
 
 let timerInterval = null;
@@ -373,7 +524,7 @@ let active = false;
 
 
 /* =========================
-   SAVE
+SAVE DATA
 ========================= */
 
 function saveData() {
@@ -393,26 +544,116 @@ JSON.stringify(sessions)
 
 
 /* =========================
-   ADD MODULE
+DAILY GOAL
+========================= */
+
+function saveGoal() {
+
+dailyGoal =
+Number(
+document.getElementById("dailyGoal").value
+);
+
+if (dailyGoal <= 0) {
+
+dailyGoal = 3;
+
+document.getElementById(
+"dailyGoal"
+).value = 3;
+
+}
+
+localStorage.setItem(
+"dailyGoal",
+dailyGoal
+);
+
+renderDashboard();
+
+}
+
+
+
+/* =========================
+DATE HELPERS
+========================= */
+
+function getDateString(date) {
+
+return date.toLocaleDateString(
+"en-CA"
+);
+
+}
+
+
+function isToday(dateString) {
+
+const date =
+new Date(dateString);
+
+return (
+date.getFullYear() === new Date().getFullYear() &&
+date.getMonth() === new Date().getMonth() &&
+date.getDate() === new Date().getDate()
+);
+
+}
+
+
+
+/* =========================
+TODAY TIME
+========================= */
+
+function getTodayTime() {
+
+return sessions
+
+.filter(session =>
+isToday(session.date)
+)
+
+.reduce(
+(total, session) =>
+total + session.duration,
+0
+);
+
+}
+
+
+
+/* =========================
+ADD MODULE
 ========================= */
 
 function addModule() {
 
 const name =
-document.getElementById("moduleName").value.trim();
+document.getElementById(
+"moduleName"
+).value.trim();
 
 const examDate =
-document.getElementById("examDate").value;
+document.getElementById(
+"examDate"
+).value;
 
 const targetHours =
 Number(
-document.getElementById("targetHours").value
+document.getElementById(
+"targetHours"
+).value
 );
 
 
 if (!name) {
 
-alert("Please enter a module name.");
+alert(
+"Please enter a module name."
+);
 
 return;
 
@@ -437,11 +678,17 @@ courses: []
 saveData();
 
 
-document.getElementById("moduleName").value = "";
+document.getElementById(
+"moduleName"
+).value = "";
 
-document.getElementById("examDate").value = "";
+document.getElementById(
+"examDate"
+).value = "";
 
-document.getElementById("targetHours").value = "";
+document.getElementById(
+"targetHours"
+).value = "";
 
 
 render();
@@ -451,7 +698,7 @@ render();
 
 
 /* =========================
-   DELETE MODULE
+DELETE MODULE
 ========================= */
 
 function deleteModule(id) {
@@ -462,8 +709,8 @@ if (!confirm(
 
 
 modules =
-modules.filter(module =>
-module.id !== id
+modules.filter(
+module => module.id !== id
 );
 
 
@@ -476,7 +723,7 @@ render();
 
 
 /* =========================
-   ADD COURSE
+ADD COURSE
 ========================= */
 
 function addCourse(moduleId) {
@@ -493,7 +740,9 @@ input.value.trim();
 
 if (!name) {
 
-alert("Enter a course name.");
+alert(
+"Enter a course name."
+);
 
 return;
 
@@ -501,8 +750,8 @@ return;
 
 
 const module =
-modules.find(m =>
-m.id === moduleId
+modules.find(
+m => m.id === moduleId
 );
 
 
@@ -529,7 +778,6 @@ status: "Not started"
 
 input.value = "";
 
-
 saveData();
 
 render();
@@ -539,7 +787,7 @@ render();
 
 
 /* =========================
-   CHANGE COURSE STATUS
+CHANGE COURSE STATUS
 ========================= */
 
 function changeCourseStatus(
@@ -549,8 +797,8 @@ newStatus
 ) {
 
 const module =
-modules.find(m =>
-m.id === moduleId
+modules.find(
+m => m.id === moduleId
 );
 
 
@@ -558,15 +806,16 @@ if (!module) return;
 
 
 const course =
-module.courses.find(c =>
-c.id === courseId
+module.courses.find(
+c => c.id === courseId
 );
 
 
 if (!course) return;
 
 
-course.status = newStatus;
+course.status =
+newStatus;
 
 
 saveData();
@@ -578,7 +827,7 @@ render();
 
 
 /* =========================
-   DELETE COURSE
+DELETE COURSE
 ========================= */
 
 function deleteCourse(
@@ -587,8 +836,8 @@ courseId
 ) {
 
 const module =
-modules.find(m =>
-m.id === moduleId
+modules.find(
+m => m.id === moduleId
 );
 
 
@@ -596,8 +845,8 @@ if (!module) return;
 
 
 module.courses =
-module.courses.filter(c =>
-c.id !== courseId
+module.courses.filter(
+c => c.id !== courseId
 );
 
 
@@ -610,14 +859,15 @@ render();
 
 
 /* =========================
-   COURSE TIME
+COURSE TIME
 ========================= */
 
 function getCourseTime(courseId) {
 
 return sessions
 
-.filter(session =>
+.filter(
+session =>
 session.courseId == courseId
 )
 
@@ -632,14 +882,15 @@ total + session.duration,
 
 
 /* =========================
-   MODULE TIME
+MODULE TIME
 ========================= */
 
 function getModuleTime(moduleId) {
 
 return sessions
 
-.filter(session =>
+.filter(
+session =>
 session.moduleId == moduleId
 )
 
@@ -654,13 +905,15 @@ total + session.duration,
 
 
 /* =========================
-   RENDER MODULES
+RENDER MODULES
 ========================= */
 
 function renderModules() {
 
 const container =
-document.getElementById("modules");
+document.getElementById(
+"modules"
+);
 
 
 if (modules.length === 0) {
@@ -720,7 +973,8 @@ const today = new Date();
 
 const exam =
 new Date(
-module.examDate + "T00:00:00"
+module.examDate +
+"T00:00:00"
 );
 
 
@@ -770,11 +1024,14 @@ coursesHTML =
 else {
 
 
-module.courses.forEach(course => {
+module.courses.forEach(
+course => {
 
 
 const courseSeconds =
-getCourseTime(course.id);
+getCourseTime(
+course.id
+);
 
 
 coursesHTML += `
@@ -870,7 +1127,9 @@ ${formatTime(studiedSeconds)}
 </strong>
 
 ${module.targetHours
-? " / " + module.targetHours + "h"
+? " / " +
+module.targetHours +
+"h"
 : ""}
 
 </p>
@@ -880,16 +1139,14 @@ ${module.targetHours
 
 <div
 class="progress-bar"
-style="width:${percentage}%"
-></div>
+style="width:${percentage}%">
+</div>
 
 </div>
 
 
 <div class="small">
-
 ${percentage.toFixed(0)}% of target
-
 </div>
 
 
@@ -918,7 +1175,9 @@ onclick="addCourse(${module.id})"
 
 <button
 class="delete"
-onclick="deleteModule(${module.id})"
+onclick="deleteModule(
+${module.id}
+)"
 >
 Delete Module
 </button>
@@ -934,11 +1193,10 @@ Delete Module
 
 
 /* =========================
-   TIMER
+TIMER
 ========================= */
 
 function startTimer() {
-
 
 const moduleId =
 document.getElementById(
@@ -954,7 +1212,9 @@ document.getElementById(
 
 if (!moduleId) {
 
-alert("Choose a module first.");
+alert(
+"Choose a module first."
+);
 
 return;
 
@@ -963,7 +1223,9 @@ return;
 
 if (!courseId) {
 
-alert("Choose a course first.");
+alert(
+"Choose a course first."
+);
 
 return;
 
@@ -975,7 +1237,8 @@ if (active) return;
 
 active = true;
 
-startTime = Date.now();
+startTime =
+Date.now();
 
 
 timerInterval =
@@ -989,11 +1252,10 @@ updateTimer,
 
 
 /* =========================
-   PAUSE
+PAUSE
 ========================= */
 
 function pauseTimer() {
-
 
 if (!active) return;
 
@@ -1001,15 +1263,16 @@ if (!active) return;
 elapsedBeforePause +=
 
 Math.floor(
-(Date.now() - startTime) /
-1000
+(Date.now() -
+startTime) / 1000
 );
 
 
-clearInterval(timerInterval);
+clearInterval(
+timerInterval
+);
 
 active = false;
-
 
 updateTimer();
 
@@ -1018,11 +1281,10 @@ updateTimer();
 
 
 /* =========================
-   STOP & SAVE
+STOP & SAVE
 ========================= */
 
 function stopTimer() {
-
 
 let duration =
 elapsedBeforePause;
@@ -1033,8 +1295,8 @@ if (active) {
 duration +=
 
 Math.floor(
-(Date.now() - startTime) /
-1000
+(Date.now() -
+startTime) / 1000
 );
 
 }
@@ -1068,14 +1330,14 @@ document.getElementById(
 
 
 const module =
-modules.find(m =>
-m.id === moduleId
+modules.find(
+m => m.id === moduleId
 );
 
 
 const course =
-module?.courses.find(c =>
-c.id === courseId
+module?.courses.find(
+c => c.id === courseId
 );
 
 
@@ -1100,12 +1362,14 @@ course
 duration: duration,
 
 date:
-new Date().toLocaleString()
+new Date().toString()
 
 });
 
 
-clearInterval(timerInterval);
+clearInterval(
+timerInterval
+);
 
 
 timerInterval = null;
@@ -1132,11 +1396,10 @@ render();
 
 
 /* =========================
-   UPDATE TIMER
+UPDATE TIMER
 ========================= */
 
 function updateTimer() {
-
 
 let seconds =
 elapsedBeforePause;
@@ -1147,8 +1410,8 @@ if (active) {
 seconds +=
 
 Math.floor(
-(Date.now() - startTime) /
-1000
+(Date.now() -
+startTime) / 1000
 );
 
 }
@@ -1164,11 +1427,10 @@ formatClock(seconds);
 
 
 /* =========================
-   COURSE SELECT
+COURSE SELECT
 ========================= */
 
 function updateCourseSelect() {
-
 
 const moduleId =
 Number(
@@ -1185,20 +1447,23 @@ document.getElementById(
 
 
 select.innerHTML =
-'<option value="">Choose a course</option>';
+'<option value="">' +
+'Choose a course' +
+'</option>';
 
 
 const module =
-modules.find(m =>
-m.id === moduleId
+modules.find(
+m => m.id === moduleId
 );
 
 
-if (!module || !module.courses)
-return;
+if (!module ||
+!module.courses) return;
 
 
-module.courses.forEach(course => {
+module.courses.forEach(
+course => {
 
 select.innerHTML += `
 
@@ -1215,11 +1480,10 @@ ${course.name}
 
 
 /* =========================
-   RENDER SELECT
+MODULE SELECT
 ========================= */
 
 function renderSelect() {
-
 
 const select =
 document.getElementById(
@@ -1232,10 +1496,13 @@ select.value;
 
 
 select.innerHTML =
-'<option value="">Choose a module</option>';
+'<option value="">' +
+'Choose a module' +
+'</option>';
 
 
-modules.forEach(module => {
+modules.forEach(
+module => {
 
 select.innerHTML += `
 
@@ -1248,7 +1515,8 @@ ${module.name}
 });
 
 
-select.value = current;
+select.value =
+current;
 
 
 updateCourseSelect();
@@ -1258,11 +1526,10 @@ updateCourseSelect();
 
 
 /* =========================
-   SESSIONS
+SESSIONS
 ========================= */
 
 function renderSessions() {
-
 
 const container =
 document.getElementById(
@@ -1285,7 +1552,8 @@ return;
 container.innerHTML = "";
 
 
-sessions.forEach(session => {
+sessions.forEach(
+session => {
 
 container.innerHTML += `
 
@@ -1298,15 +1566,22 @@ ${session.moduleName}
 <br>
 
 <span class="small">
-📚 ${session.courseName || "General"}
+📚 ${
+session.courseName ||
+"General"
+}
 </span>
 
 <br>
 
-⏱ ${formatTime(session.duration)}
+⏱ ${formatTime(
+session.duration
+)}
 
 <div class="small">
-${session.date}
+${new Date(
+session.date
+).toLocaleString()}
 </div>
 
 </div>
@@ -1320,11 +1595,10 @@ ${session.date}
 
 
 /* =========================
-   DASHBOARD
+DASHBOARD
 ========================= */
 
 function renderDashboard() {
-
 
 const totalSeconds =
 sessions.reduce(
@@ -1334,10 +1608,24 @@ total + session.duration,
 );
 
 
+const todaySeconds =
+getTodayTime();
+
+
 document.getElementById(
 "totalTime"
 ).textContent =
-formatTime(totalSeconds);
+formatTime(
+totalSeconds
+);
+
+
+document.getElementById(
+"todayTime"
+).textContent =
+formatTime(
+todaySeconds
+);
 
 
 document.getElementById(
@@ -1351,16 +1639,344 @@ document.getElementById(
 ).textContent =
 modules.length;
 
+
+const goalSeconds =
+dailyGoal * 3600;
+
+
+const percentage =
+Math.min(
+100,
+(todaySeconds /
+goalSeconds) * 100
+);
+
+
+document.getElementById(
+"goalProgressBar"
+).style.width =
+percentage + "%";
+
+
+document.getElementById(
+"goalText"
+).textContent =
+
+`${formatTime(
+todaySeconds
+)} / ${dailyGoal}h`;
+
 }
 
 
 
 /* =========================
-   FORMAT TIME
+STUDY DAYS
+========================= */
+
+function getStudyDates() {
+
+const dates = new Set();
+
+
+sessions.forEach(
+session => {
+
+const date =
+new Date(session.date);
+
+dates.add(
+getDateString(date)
+);
+
+});
+
+
+return dates;
+
+}
+
+
+
+/* =========================
+CURRENT STREAK
+========================= */
+
+function calculateCurrentStreak() {
+
+const studyDates =
+getStudyDates();
+
+
+let streak = 0;
+
+let date =
+new Date();
+
+
+while (true) {
+
+const key =
+getDateString(date);
+
+
+if (!studyDates.has(key)) {
+
+break;
+
+}
+
+
+streak++;
+
+
+date.setDate(
+date.getDate() - 1
+);
+
+}
+
+
+return streak;
+
+}
+
+
+
+/* =========================
+BEST STREAK
+========================= */
+
+function calculateBestStreak() {
+
+const studyDates =
+getStudyDates();
+
+
+if (studyDates.size === 0)
+return 0;
+
+
+const sorted =
+Array.from(
+studyDates
+).sort();
+
+
+let best = 1;
+
+let current = 1;
+
+
+for (
+let i = 1;
+i < sorted.length;
+i++
+) {
+
+
+const previous =
+new Date(
+sorted[i - 1] +
+"T00:00:00"
+);
+
+
+const currentDate =
+new Date(
+sorted[i] +
+"T00:00:00"
+);
+
+
+const difference =
+(
+currentDate -
+previous
+) /
+(1000 * 60 * 60 * 24);
+
+
+if (difference === 1) {
+
+current++;
+
+best =
+Math.max(
+best,
+current
+);
+
+}
+
+else {
+
+current = 1;
+
+}
+
+}
+
+
+return best;
+
+}
+
+
+
+/* =========================
+STREAK RENDER
+========================= */
+
+function renderStreak() {
+
+document.getElementById(
+"currentStreak"
+).textContent =
+calculateCurrentStreak();
+
+
+document.getElementById(
+"bestStreak"
+).textContent =
+calculateBestStreak();
+
+}
+
+
+
+/* =========================
+WEEKLY CHART
+========================= */
+
+function renderWeeklyChart() {
+
+const container =
+document.getElementById(
+"weeklyChart"
+);
+
+
+container.innerHTML = "";
+
+
+const today =
+new Date();
+
+
+const days = [];
+
+
+for (
+let i = 6;
+i >= 0;
+i--
+) {
+
+const date =
+new Date(today);
+
+
+date.setDate(
+today.getDate() - i
+);
+
+
+days.push(date);
+
+}
+
+
+const values =
+days.map(
+day => {
+
+const key =
+getDateString(day);
+
+
+return sessions
+
+.filter(
+session =>
+getDateString(
+new Date(session.date)
+) === key
+)
+
+.reduce(
+(total, session) =>
+total + session.duration,
+0
+);
+
+});
+
+
+const max =
+Math.max(
+...values,
+3600
+);
+
+
+days.forEach(
+(day, index) => {
+
+
+const seconds =
+values[index];
+
+
+const percentage =
+(seconds / max) * 100;
+
+
+const label =
+day.toLocaleDateString(
+"en-US",
+{
+weekday: "short"
+}
+);
+
+
+container.innerHTML += `
+
+<div class="day-row">
+
+<div class="day-label">
+${label}
+</div>
+
+<div class="chart-bar">
+
+<div
+class="chart-fill"
+style="width:${percentage}%">
+</div>
+
+</div>
+
+<div class="day-hours">
+${formatTime(seconds)}
+</div>
+
+</div>
+
+`;
+
+});
+
+}
+
+
+
+/* =========================
+FORMAT
 ========================= */
 
 function formatTime(seconds) {
-
 
 const hours =
 Math.floor(
@@ -1374,14 +1990,14 @@ Math.floor(
 );
 
 
-return `${hours}h ${String(minutes).padStart(2,"0")}m`;
+return `${hours}h ${String(
+minutes
+).padStart(2,"0")}m`;
 
 }
 
 
-
 function formatClock(seconds) {
-
 
 const hours =
 Math.floor(
@@ -1399,27 +2015,42 @@ const secs =
 seconds % 60;
 
 
-return `${String(hours).padStart(2,"0")}:` +
+return `${String(
+hours
+).padStart(2,"0")}:` +
 
-`${String(minutes).padStart(2,"0")}:` +
+`${String(
+minutes
+).padStart(2,"0")}:` +
 
-`${String(secs).padStart(2,"0")}`;
+`${String(
+secs
+).padStart(2,"0")}`;
 
 }
 
 
 
 /* =========================
-   RENDER EVERYTHING
+RENDER
 ========================= */
 
 function render() {
+
+document.getElementById(
+"dailyGoal"
+).value =
+dailyGoal;
 
 renderModules();
 
 renderSessions();
 
 renderDashboard();
+
+renderStreak();
+
+renderWeeklyChart();
 
 renderSelect();
 
