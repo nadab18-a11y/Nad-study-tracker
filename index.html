@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>My Study Tracker</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f7f8;
+            color: #172126;
+        }
+
+        .container {
+            width: min(900px, 92%);
+            margin: 30px auto;
+        }
+
+        header {
+            margin-bottom: 25px;
+        }
+
+        h1 {
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            color: #6b777d;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 18px;
+            padding: 22px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        }
+
+        .full {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 7px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        input,
+        select,
+        button {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #d7dfe2;
+            font-size: 16px;
+        }
+
+        input,
+        select {
+            background: white;
+        }
+
+        button {
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .primary {
+            background: #00a9bd;
+            color: white;
+            border: none;
+        }
+
+        .secondary {
+            background: #eef3f4;
+            color: #172126;
+        }
+
+        .danger {
+            background: #fff0f0;
+            color: #b42318;
+            border-color: #ffd0d0;
+        }
+
+        .timer {
+            text-align: center;
+            font-size: clamp(45px, 12vw, 80px);
+            font-weight: bold;
+            letter-spacing: 2px;
+            margin: 20px 0;
+        }
+
+        .timer-status {
+            text-align: center;
+            color: #6b777d;
+            margin-bottom: 20px;
+        }
+
+        .button-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .stat {
+            background: #f6f8f9;
+            padding: 16px;
+            border-radius: 14px;
+        }
+
+        .stat-label {
+            color: #6b777d;
+            font-size: 13px;
+        }
+
+        .stat-value {
+            font-size: 25px;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .progress-container {
+            height: 12px;
+            background: #e6ecee;
+            border-radius: 20px;
+            overflow: hidden;
+            margin: 12px 0;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: #00a9bd;
+            transition: width 0.3s ease;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #6b777d;
+        }
+
+        .session {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #edf0f1;
+        }
+
+        .session:last-child {
+            border-bottom: none;
+        }
+
+        .empty {
+            color: #7c878c;
+            text-align: center;
+            padding: 15px;
+        }
+
+        @media (max-width: 650px) {
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .full {
+                grid-column: auto;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .button-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <header>
+        <h1>📚 My Study Tracker</h1>
+        <div class="subtitle">
+            Study smarter. Track your time. Know where you stand.
+        </div>
+    </header>
+
+
+    <!-- MODULE SETTINGS -->
+
+    <div class="grid">
+
+        <div class="card">
+
+            <label for="module">Module</label>
+
+            <input
+                id="module"
+                type="text"
+                placeholder="e.g. Uro-Nephro"
+            >
+
+        </div>
+
+
+        <div class="card">
+
+            <label for="examDate">Exam date</label>
+
+            <input
+                id="examDate"
+                type="date"
+            >
+
+        </div>
+
+
+        <div class="card">
+
+            <label for="targetHours">Target study hours</label>
+
+            <input
+                id="targetHours"
+                type="number"
+                min="1"
+                placeholder="e.g. 40"
+            >
+
+        </div>
+
+
+        <div class="card">
+
+            <label>&nbsp;</label>
+
+            <button
+                id="saveSettings"
+                class="primary"
+            >
+                Save module
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- TIMER -->
+
+    <div class="card full" style="margin-top:18px;">
+
+        <h2 id="currentModule">
+            No module selected
+        </h2>
+
+        <div
+            id="timer"
+            class="timer"
+        >
+            00:00:00
+        </div>
+
+        <div
+            id="timerStatus"
+            class="timer-status"
+        >
+            Ready to study
+        </div>
+
+        <div class="button-row">
+
+            <button
+                id="startButton"
+                class="primary"
+            >
+                ▶ Start
+            </button>
+
+            <button
+                id="pauseButton"
+                class="secondary"
+                disabled
+            >
+                ⏸ Pause
+            </button>
+
+            <button
+                id="stopButton"
+                class="danger"
+                disabled
+            >
+                ⏹ Stop & Save
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- DASHBOARD -->
+
+    <div
+        class="card full"
+        style="margin-top:18px;"
+    >
+
+        <h2>Dashboard</h2>
+
+        <div class="stats">
+
+            <div class="stat">
+
+                <div class="stat-label">
+                    Days until exam
+                </div>
+
+                <div
+                    id="daysLeft"
+                    class="stat-value"
+                >
+                    —
+                </div>
+
+            </div>
+
+
+            <div class="stat">
+
+                <div class="stat-label">
+                    Total studied
+                </div>
+
+                <div
+                    id="totalTime"
+                    class="stat-value"
+                >
+                    0h 00m
+                </div>
+
+            </div>
+
+
+            <div class="stat">
+
+                <div class="stat-label">
+                    Target
+                </div>
+
+                <div
+                    id="targetDisplay"
+                    class="stat-value"
+                >
+                    —
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <h3 style="margin-top:25px;">
+            Progress
+        </h3>
+
+        <div class="progress-container">
+
+            <div
+                id="progressBar"
+                class="progress-bar"
+            ></div>
+
+        </div>
+
+        <div class="progress-info">
+
+            <span id="progressText">
+                0%
+            </span>
+
+            <span id="remainingText">
+                —
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <!-- SESSIONS -->
+
+    <div
+        class="card full"
+        style="margin-top:18px;"
+    >
+
+        <h2>Study sessions</h2>
+
+        <div id="sessions">
+
+            <div class="empty">
+                No study sessions yet.
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    /*
+        ==========================================
+        STUDY TRACKER
+        ==========================================
+    */
+
+
+    let timerInterval = null;
+
+    let startTime = null;
+
+    let elapsedSeconds = 0;
+
+    let isRunning = false;
+
+    let sessions = [];
+
+
+    /*
+        LOAD SAVED DATA
+    */
+
+    function loadData() {
+
+        const savedSettings =
+            localStorage.getItem("studySettings");
+
+        const savedSessions =
+            localStorage.getItem("studySessions");
+
+
+        if (savedSettings) {
+
+            const settings =
+                JSON.parse(savedSettings);
+
+            document.getElementById("module").value =
+                settings.module || "";
+
+            document.getElementById("examDate").value =
+                settings.examDate || "";
+
+            document.getElementById("targetHours").value =
+                settings.targetHours || "";
+
+        }
+
+
+        if (savedSessions) {
+
+            sessions =
+                JSON.parse(savedSessions);
+
+        }
+
+
+        updateDashboard();
+
+    }
+
+
+    /*
+        SAVE SETTINGS
+    */
+
+    document
+        .getElementById("saveSettings")
+        .addEventListener("click", function () {
+
+            const module =
+                document.getElementById("module").value.trim();
+
+            const examDate =
+                document.getElementById("examDate").value;
+
+            const targetHours =
+                Number(
+                    document.getElementById("targetHours").value
+                );
+
+
+            if (!module) {
+
+                alert("Please enter a module name.");
+
+                return;
+
+            }
+
+
+            if (!examDate) {
+
+                alert("Please choose an exam date.");
+
+                return;
+
+            }
+
+
+            if (!targetHours || targetHours <= 0) {
+
+                alert("Please enter a valid target.");
+
+                return;
+
+            }
+
+
+            const settings = {
+
+                module: module,
+
+                examDate: examDate,
+
+                targetHours: targetHours
+
+            };
+
+
+            localStorage.setItem(
+                "studySettings",
+                JSON.stringify(settings)
+            );
+
+
+            updateDashboard();
+
+            alert("Module saved!");
+
+        });
+
+
+    /*
+        FORMAT TIMER
+    */
+
+    function formatTime(totalSeconds) {
+
+        totalSeconds =
+            Math.floor(totalSeconds);
+
+
+        const hours =
+            Math.floor(totalSeconds / 3600);
+
+
+        const minutes =
+            Math.floor(
+                (totalSeconds % 3600) / 60
+            );
+
+
+        const seconds =
+            totalSeconds % 60;
+
+
+        return (
+            String(hours).padStart(2, "0")
+            + ":" +
+            String(minutes).padStart(2, "0")
+            + ":" +
+            String(seconds).padStart(2, "0")
+        );
+
+    }
+
+
+    /*
+        START TIMER
+    */
+
+    document
+        .getElementById("startButton")
+        .addEventListener("click", function () {
+
+            if (isRunning) return;
+
+
+            const module =
+                document.getElementById("module").value.trim();
+
+
+            if (!module) {
+
+                alert(
+                    "Choose a module before starting."
+                );
+
+                return;
+
+            }
+
+
+            isRunning = true;
+
+            startTime = Date.now();
+
+
+            document.getElementById("startButton")
+                .disabled = true;
+
+
+            document.getElementById("pauseButton")
+                .disabled = false;
+
+
+            document.getElementById("stopButton")
+                .disabled = false;
+
+
+            document.getElementById("timerStatus")
+                .textContent = "Studying…";
+
+
+            timerInterval =
+                setInterval(updateTimer, 250);
+
+        });
+
+
+    /*
+        UPDATE TIMER
+    */
+
+    function updateTimer() {
+
+        if (!isRunning) return;
+
+
+        const currentTime =
+            Date.now();
+
+
+        const currentElapsed =
+            elapsedSeconds +
+            (
+                (currentTime - startTime)
+                / 1000
+            );
+
+
+        document.getElementById("timer")
+            .textContent =
+            formatTime(currentElapsed);
+
+    }
+
+
+    /*
+        PAUSE
+    */
+
+    document
+        .getElementById("pauseButton")
+        .addEventListener("click", function () {
+
+            if (!isRunning) return;
+
+
+            elapsedSeconds +=
+                (
+                    Date.now() - startTime
+                ) / 1000;
+
+
+            isRunning = false;
+
+
+            clearInterval(timerInterval);
+
+
+            document.getElementById("startButton")
+                .disabled = false;
+
+
+            document.getElementById("pauseButton")
+                .disabled = true;
+
+
+            document.getElementById("timerStatus")
+                .textContent =
+                "Paused";
+
+        });
+
+
+    /*
+        STOP + SAVE SESSION
+    */
+
+    document
+        .getElementById("stopButton")
+        .addEventListener("click", function () {
+
+            if (isRunning) {
+
+                elapsedSeconds +=
+                    (
+                        Date.now() - startTime
+                    ) / 1000;
+
+            }
+
+
+            const duration =
+                Math.round(elapsedSeconds);
+
+
+            if (duration < 1) {
+
+                resetTimer();
+
+                return;
+
+            }
+
+
+            const module =
+                document.getElementById("module")
+                    .value.trim();
+
+
+            const session = {
+
+                module: module,
+
+                duration: duration,
+
+                date: new Date().toISOString(),
+
+                displayDate:
+                    new Date().toLocaleString()
+
+            };
+
+
+            sessions.push(session);
+
+
+            localStorage.setItem(
+                "studySessions",
+                JSON.stringify(sessions)
+            );
+
+
+            resetTimer();
+
+            updateDashboard();
+
+        });
+
+
+    /*
+        RESET TIMER
+    */
+
+    function resetTimer() {
+
+        clearInterval(timerInterval);
+
+
+        isRunning = false;
+
+        elapsedSeconds = 0;
+
+        startTime = null;
+
+
+        document.getElementById("timer")
+            .textContent =
+            "00:00:00";
+
+
+        document.getElementById("timerStatus")
+            .textContent =
+            "Ready to study";
+
+
+        document.getElementById("startButton")
+            .disabled = false;
+
+
+        document.getElementById("pauseButton")
+            .disabled = true;
+
+
+        document.getElementById("stopButton")
+            .disabled = true;
+
+    }
+
+
+    /*
+        TOTAL STUDY TIME
+    */
+
+    function getTotalSeconds() {
+
+        return sessions.reduce(
+            function(total, session) {
+
+                return total + session.duration;
+
+            },
+            0
+        );
+
+    }
+
+
+    /*
+        FORMAT HOURS
+    */
+
+    function formatHours(seconds) {
+
+        const hours =
+            Math.floor(seconds / 3600);
+
+
+        const minutes =
+            Math.floor(
+                (seconds % 3600) / 60
+            );
+
+
+        return (
+            hours +
+            "h " +
+            String(minutes).padStart(2, "0") +
+            "m"
+        );
+
+    }
+
+
+    /*
+        DAYS UNTIL EXAM
+    */
+
+    function calculateDaysLeft(dateString) {
+
+        if (!dateString) return null;
+
+
+        const today =
+            new Date();
+
+
+        const todayUTC =
+            Date.UTC(
+                today.getFullYear(),
+                today.getMonth(),
+                today.getDate()
+            );
+
+
+        const exam =
+            new Date(dateString + "T00:00:00");
+
+
+        const examUTC =
+            Date.UTC(
+                exam.getFullYear(),
+                exam.getMonth(),
+                exam.getDate()
+            );
+
+
+        return Math.ceil(
+            (examUTC - todayUTC)
+            / (1000 * 60 * 60 * 24)
+        );
+
+    }
+
+
+    /*
+        UPDATE DASHBOARD
+    */
+
+    function updateDashboard() {
+
+        const savedSettings =
+            localStorage.getItem("studySettings");
+
+
+        let settings = null;
+
+
+        if (savedSettings) {
+
+            settings =
+                JSON.parse(savedSettings);
+
+        }
+
+
+        const totalSeconds =
+            getTotalSeconds();
+
+
+        document.getElementById("totalTime")
+            .textContent =
+            formatHours(totalSeconds);
+
+
+        /*
+            MODULE
+        */
+
+        if (settings) {
+
+            document.getElementById("currentModule")
+                .textContent =
+                settings.module;
+
+
+            document.getElementById("targetDisplay")
+                .textContent =
+                settings.targetHours + "h";
+
+
+            const targetSeconds =
+                settings.targetHours * 3600;
+
+
+            const percentage =
+                Math.min(
+                    100,
+                    (
+                        totalSeconds /
+                        targetSeconds
+                    ) * 100
+                );
+
+
+            document.getElementById("progressBar")
+                .style.width =
+                percentage + "%";
+
+
+            document.getElementById("progressText")
+                .textContent =
+                Math.round(percentage) + "%";
+
+
+            const remaining =
+                Math.max(
+                    0,
+                    targetSeconds -
+                    totalSeconds
+                );
+
+
+            document.getElementById("remainingText")
+                .textContent =
+                formatHours(remaining)
+                + " remaining";
+
+
+            /*
+                EXAM COUNTDOWN
+            */
+
+            const days =
+                calculateDaysLeft(
+                    settings.examDate
+                );
+
+
+            if (days === null) {
+
+                document.getElementById("daysLeft")
+                    .textContent = "—";
+
+            }
+
+            else if (days < 0) {
+
+                document.getElementById("daysLeft")
+                    .textContent = "Passed";
+
+            }
+
+            else if (days === 0) {
+
+                document.getElementById("daysLeft")
+                    .textContent = "Today";
+
+            }
+
+            else {
+
+                document.getElementById("daysLeft")
+                    .textContent =
+                    days + " days";
+
+            }
+
+        }
+
+
+        /*
+            SESSIONS
+        */
+
+        const sessionsContainer =
+            document.getElementById("sessions");
+
+
+        if (sessions.length === 0) {
+
+            sessionsContainer.innerHTML =
+                '<div class="empty">No study sessions yet.</div>';
+
+            return;
+
+        }
+
+
+        sessionsContainer.innerHTML =
+            sessions
+                .slice()
+                .reverse()
+                .map(function(session) {
+
+                    return `
+                        <div class="session">
+
+                            <div>
+
+                                <strong>
+                                    ${session.module}
+                                </strong>
+
+                                <div
+                                    style="color:#7c878c;font-size:13px;"
+                                >
+                                    ${session.displayDate}
+                                </div>
+
+                            </div>
+
+                            <strong>
+                                ${formatHours(session.duration)}
+                            </strong>
+
+                        </div>
+                    `;
+
+                })
+                .join("");
+
+    }
+
+
+    /*
+        INITIALIZE
+    */
+
+    loadData();
+
+</script>
+
+</body>
+</html>
